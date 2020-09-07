@@ -1,0 +1,64 @@
+$font-family-sans-serif: "Poppins";
+
+// Colors
+$white: #fff;
+$gray-100: #f8f9fa;
+$gray-200: #e9ecef;
+$gray-300: #dee2e6;
+$gray-400: #ced4da;
+$gray-500: #adb5bd;
+$gray-600: #6c757d;
+$gray-700: #4f5467;
+$gray-800: #343a40;
+$gray-900: #212529;
+$black: #000;
+
+// Base colors definitions
+$blue: #007bff;
+$indigo: #6610f2;
+$purple: #6f42c1;
+$pink: #e83e8c;
+$red: #dc3545;
+$orange: #fd7e14;
+$yellow: #ffc107;
+$green: #28a745;
+$teal: #20c997;
+$cyan: #17a2b8;
+
+// Custom Colors
+$muted-gray: #c7c7c7;
+$primary: #607d8b;
+$secondary: #37474f;
+$accent: #42a5f5;
+$dark-secondary: #16161a;
+
+$colors: (
+  white: $white,
+  muted-gray: $muted-gray,
+  gray: $gray-600,
+  gray-dark: $gray-800,
+  accent: $accent,
+  dark-secondary: $dark-secondary,
+);
+
+$theme-colors: (
+  primary: $primary,
+  secondary: $secondary,
+  success: $green,
+  info: $blue,
+  warning: $yellow,
+  danger: $red,
+  light: $gray-200,
+  cyan: $cyan,
+  dark: $gray-900,
+  purple: $purple,
+);
+
+$body-bg: $white;
+$body-color: $gray-800;
+$link-color: $accent;
+$enable-responsive-font-sizes: true;
+$bv-enable-table-stacked: false;
+
+@import "node_modules/bootstrap/scss/bootstrap";
+@import "node_modules/bootstrap-vue/src/index.scss";
