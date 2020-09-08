@@ -1,4 +1,4 @@
-# inventory_frontend
+# dashboard
 
 ## Project setup
 ```

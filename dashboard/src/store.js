@@ -3,7 +3,8 @@ import Vuex from "vuex";
 
 Vue.use(Vuex);
 
-import Config from "./services/config.js";
+import dashboardService from "./services/dashboard.sevice";
+
 
 export default new Vuex.Store({
   // the vuex state variable
@@ -48,39 +49,14 @@ export default new Vuex.Store({
     //set dashboard values
     setDadhboard({ commit }, payload) {
 
-      console.log(payload);
+      var dashboardValue = {
+        //first chart
+        operational: 0,
+        nonOperational: 0,
+        chartValue: [],
 
-
-      fetch(`${Config.baseURL}&max=${payload.max}&last=${payload.last}`, {
-        method: 'HEAD',
-        mode: 'no-cors',
-        headers: {
-          "Content-Type": "application/json"
-        },
-      }).then(function (response) {
-        console.log(response);
-      }).catch(function (e) {
-        console.log(e);
-      });
-
-      // console.log(response);
-
-      var data = []
-
-      var operationalData = data.filter(function (val) {
-        return val.OperationalStatus == 'Operational'
-      });
-
-      var setValue = {
-        operational: operationalData.length,
-        nonOperational: 10,
-        chartValue: [operationalData.length, 10],
-        barChart: [
-          {
-            name: "Value",
-            data: [2.3, 3.1, 4.0, 10.1],
-          }
-        ],
+        //second chart
+        barChart: [],
         barChartOptions: {
           chart: {
             height: 350,
@@ -103,7 +79,7 @@ export default new Vuex.Store({
           },
 
           xaxis: {
-            categories: ["a", "d", "fg", "gg"],
+            categories: [],
             position: "bottom",
             axisBorder: {
               show: false,
@@ -138,89 +114,67 @@ export default new Vuex.Store({
               show: false,
             },
           },
-        },
-
+        }
       }
 
-      commit("SET_DASHBOARD", setValue);
-    },
+      dashboardService
+        .getDashboardData(payload)
+        .then((response) => {
 
-    changeDadhboard({ commit }) {
-      var setValue = {
-        operational: 150,
-        nonOperational: 10,
-        chartValue: [150, 10],
-        barChart: [
-          {
-            name: "Value",
-            data: [10, 34, 4.0, 10.1],
+          if (response.data.code == 200) {
+            var data = response.data.content
+
+            //get operational data
+            var operationalData = data.filter(function (val) {
+              return val.OperationalStatus == 'Operational'
+            });
+
+            //get non-operational data
+            var nonOperationalData = data.filter(function (val) {
+              return val.OperationalStatus == 'Non-Operational'
+            });
+
+            //sort AssetCategoryID wice
+            var AssetCategorySorted = Object.values(data.reduce((data, x) => {
+              data[x.AssetCategoryID] = [...(data[x.AssetCategoryID] || []), x];
+              return data;
+            }, {}));
+
+            var barChartData = []
+            var barChartXaxis = []
+
+
+            //calculate values for each category
+            AssetCategorySorted.map(obj => {
+              barChartData.push(obj.length)
+              barChartXaxis.push(obj[0].AssetCategoryID)
+              
+            })
+
+            //set values
+            dashboardValue.operational = operationalData.length
+            dashboardValue.nonOperational = nonOperationalData.length
+            dashboardValue.chartValue = [operationalData.length, nonOperationalData.length]
+            dashboardValue.barChart = [
+              {
+                name: "value",
+                data: barChartData
+              }
+            ]
+            dashboardValue.barChartOptions.xaxis.categories = barChartXaxis
+            commit("SET_DASHBOARD", dashboardValue);
           }
-        ],
-        barChartOptions: {
-          chart: {
-            height: 350,
-            type: "bar",
-          },
-          plotOptions: {
-            bar: {
-              dataLabels: {
-                position: "top",
-              },
-            },
-          },
-          dataLabels: {
-            enabled: true,
-            offsetY: -20,
-            style: {
-              fontSize: "12px",
-              colors: ["#304758"],
-            },
-          },
+          else {
+            commit("SET_DASHBOARD", dashboardValue);
 
-          xaxis: {
-            categories: ["a", "d", "fg", "gg"],
-            position: "bottom",
-            axisBorder: {
-              show: false,
-            },
-            axisTicks: {
-              show: false,
-            },
-            crosshairs: {
-              fill: {
-                type: "gradient",
-                gradient: {
-                  colorFrom: "#D8E3F0",
-                  colorTo: "#BED1E6",
-                  stops: [0, 100],
-                  opacityFrom: 0.4,
-                  opacityTo: 0.5,
-                },
-              },
-            },
-            tooltip: {
-              enabled: true,
-            },
-          },
-          yaxis: {
-            axisBorder: {
-              show: false,
-            },
-            axisTicks: {
-              show: false,
-            },
-            labels: {
-              show: false,
-            },
-          },
-        },
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+          commit("SET_DASHBOARD", dashboardValue);
+        });
 
-      }
-
-      commit("SET_DASHBOARD", setValue);
     }
-
-
   },
   // the vuex getters
   getters: {

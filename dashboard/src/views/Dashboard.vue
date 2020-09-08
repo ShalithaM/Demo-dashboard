@@ -31,9 +31,9 @@
         </b-card>
       </b-col>
       <b-col style="max-width: 20%;">
-        <b-row>
-          <b-col>Show</b-col>
-          <b-col>
+        <b-row class="mb-1">
+          <b-col class="mb-1">Show</b-col>
+          <b-col class="mb-1">
             <b-form-select
               id="show-count-select"
               v-model="selectShowCount"
@@ -41,6 +41,14 @@
               form="add-item-form"
               :state="null"
             ></b-form-select>
+          </b-col>
+        </b-row>
+        <b-row>
+          <b-col>{{startValue}} to {{endValue}}</b-col>
+        </b-row>
+        <b-row>
+          <b-col>
+            <b-button @click="loadNextData()">Load Next</b-button>
           </b-col>
         </b-row>
       </b-col>
@@ -77,9 +85,10 @@ export default {
 
   data() {
     return {
-      showCounts: [10, 20, 30, 40, 50],
+      showCounts: [10, 20, 50, 70, 100],
       selectShowCount: 10,
-      last: 0,
+      startValue: 1,
+      endValue: 10,
       //pie chart meta data
       pieChartOptions: {
         labels: ["Operational", "Non-Operational"],
@@ -105,7 +114,7 @@ export default {
   mounted() {
     this.$store.dispatch("setDadhboard", {
       max: this.selectShowCount,
-      last: this.last,
+      last: this.startValue,
     });
   },
 
@@ -114,9 +123,28 @@ export default {
       dashboardValues: "getDashboard",
     }),
   },
+
+  watch: {
+    selectShowCount() {
+      this.startValue = 1;
+      this.endValue = this.selectShowCount;
+
+      this.$store.dispatch("setDadhboard", {
+        max: this.selectShowCount,
+        last: this.startValue,
+      });
+    },
+  },
+
   methods: {
-    test() {
-      this.$store.dispatch("changeDadhboard");
+    loadNextData() {
+      this.startValue += this.selectShowCount;
+      this.endValue += this.selectShowCount;
+
+      this.$store.dispatch("setDadhboard", {
+        max: this.selectShowCount,
+        last: this.startValue,
+      });
     },
   },
 };
