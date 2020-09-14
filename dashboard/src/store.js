@@ -50,6 +50,7 @@ export default new Vuex.Store({
     setDadhboard({ commit }, payload) {
 
       var dashboardValue = {
+        lastIndex: 0,
         //first chart
         operational: 0,
         nonOperational: 0,
@@ -148,10 +149,12 @@ export default new Vuex.Store({
             AssetCategorySorted.map(obj => {
               barChartData.push(obj.length)
               barChartXaxis.push(obj[0].AssetCategoryID)
-              
+
             })
 
             //set values
+            dashboardValue.lastIndex = Number(data.slice(-1)[0].__rowid__)
+            dashboardValue.allData = data
             dashboardValue.operational = operationalData.length
             dashboardValue.nonOperational = nonOperationalData.length
             dashboardValue.chartValue = [operationalData.length, nonOperationalData.length]
@@ -174,6 +177,72 @@ export default new Vuex.Store({
           commit("SET_DASHBOARD", dashboardValue);
         });
 
+    },
+    loadNextData() {
+
+      var payload = {
+        max : 100,
+        last : this.state.dashboard.lastIndex
+      }
+
+      dashboardService
+        .getDashboardData(payload)
+        .then((response) => {
+
+          if (response.data.code == 200) {
+            var data = response.data.content
+
+            //get operational data
+            var operationalData = data.filter(function (val) {
+              return val.OperationalStatus == 'Operational'
+            });
+
+            // //get non-operational data
+            var nonOperationalData = data.filter(function (val) {
+              return val.OperationalStatus == 'Non-Operational'
+            });
+
+
+            var barChartData = []
+            var barChartXaxis = []
+
+
+            // //set values
+            this.state.dashboard.lastIndex = Number(data.slice(-1)[0].__rowid__)
+            this.state.dashboard.operational += operationalData.length
+            this.state.dashboard.nonOperational += nonOperationalData.length
+            this.state.dashboard.chartValue = [this.state.dashboard.operational, this.state.dashboard.nonOperational]
+
+            var allData = this.state.dashboard.allData.concat(data);
+            this.state.dashboard.allData = this.state.dashboard.allData.concat(data);
+
+
+
+            //sort AssetCategoryID wice
+            var AssetCategorySorted = Object.values(allData.reduce((allData, x) => {
+              allData[x.AssetCategoryID] = [...(allData[x.AssetCategoryID] || []), x];
+              return allData;
+            }, {}));
+
+            //calculate values for each category
+            AssetCategorySorted.map(obj => {
+              barChartData.push(obj.length)
+              barChartXaxis.push(obj[0].AssetCategoryID)
+
+            })
+            this.state.dashboard.barChartOptions.xaxis.categories = barChartXaxis
+            this.state.dashboard.barChart = [
+              {
+                name: "value",
+                data: barChartData
+              }
+            ]
+          
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     }
   },
   // the vuex getters

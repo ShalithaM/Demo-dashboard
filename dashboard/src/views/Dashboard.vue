@@ -32,19 +32,7 @@
       </b-col>
       <b-col style="max-width: 20%;">
         <b-row class="mb-1">
-          <b-col class="mb-1">Show</b-col>
-          <b-col class="mb-1">
-            <b-form-select
-              id="show-count-select"
-              v-model="selectShowCount"
-              :options="showCounts"
-              form="add-item-form"
-              :state="null"
-            ></b-form-select>
-          </b-col>
-        </b-row>
-        <b-row>
-          <b-col>{{startValue}} to {{endValue}}</b-col>
+          <b-col class="mb-1">Show {{startValue + 1}} to {{endValue}}</b-col>
         </b-row>
         <b-row>
           <b-col>
@@ -85,10 +73,9 @@ export default {
 
   data() {
     return {
-      showCounts: [10, 20, 50, 70, 100],
-      selectShowCount: 10,
-      startValue: 1,
-      endValue: 10,
+      selectShowCount: 100,
+      startValue: 0,
+      endValue: 100,
       //pie chart meta data
       pieChartOptions: {
         labels: ["Operational", "Non-Operational"],
@@ -138,13 +125,9 @@ export default {
 
   methods: {
     loadNextData() {
-      this.startValue += this.selectShowCount;
       this.endValue += this.selectShowCount;
 
-      this.$store.dispatch("setDadhboard", {
-        max: this.selectShowCount,
-        last: this.startValue,
-      });
+      this.$store.dispatch("loadNextData");
     },
   },
 };
