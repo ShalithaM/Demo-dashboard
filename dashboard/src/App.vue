@@ -2,15 +2,21 @@
   <div id="app" class="h-100 w-100" >
      <SideBar/>
      <TopBar/>
+     <Loader v-if="isLoading" />
     <router-view/>
   </div>
 </template>
 
 <script>
+
+import { mapGetters } from "vuex";
+
 /* eslint-disable no-console */
 // components
 import TopBar from "@/components/layout/TopBar";
 import SideBar from "@/components/layout/SideBar";
+import Loader from "@/components/layout/Loader";
+
 
 
 export default {
@@ -18,11 +24,12 @@ export default {
   components: {
     TopBar,
     SideBar,
+    Loader
   },
-  data() {
-    return {
-      key: Number(new Date())
-    };
+  computed: {
+    ...mapGetters({
+      isLoading: "getIsloading",
+    })
   }
 };
 </script>

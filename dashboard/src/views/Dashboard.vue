@@ -30,16 +30,6 @@
           </b-row>
         </b-card>
       </b-col>
-      <b-col style="max-width: 20%;">
-        <b-row class="mb-1">
-          <b-col class="mb-1">Show {{startValue + 1}} to {{endValue}}</b-col>
-        </b-row>
-        <b-row>
-          <b-col>
-            <b-button @click="loadNextData()">Load Next</b-button>
-          </b-col>
-        </b-row>
-      </b-col>
     </b-row>
     <b-row class="mx-5">
       <b-col>
@@ -73,9 +63,6 @@ export default {
 
   data() {
     return {
-      selectShowCount: 100,
-      startValue: 0,
-      endValue: 100,
       //pie chart meta data
       pieChartOptions: {
         labels: ["Operational", "Non-Operational"],
@@ -99,10 +86,8 @@ export default {
     };
   },
   mounted() {
-    this.$store.dispatch("setDadhboard", {
-      max: this.selectShowCount,
-      last: this.startValue,
-    });
+    this.$store.dispatch("setIsLoading", true);
+    this.$store.dispatch("setDadhboard")
   },
 
   computed: {
@@ -110,26 +95,14 @@ export default {
       dashboardValues: "getDashboard",
     }),
   },
+  watch:{
+    dashboardValues(value){
+      if(value){
+        this.$store.dispatch("setIsLoading", false);
+      }
+    }
+  }
 
-  watch: {
-    selectShowCount() {
-      this.startValue = 1;
-      this.endValue = this.selectShowCount;
-
-      this.$store.dispatch("setDadhboard", {
-        max: this.selectShowCount,
-        last: this.startValue,
-      });
-    },
-  },
-
-  methods: {
-    loadNextData() {
-      this.endValue += this.selectShowCount;
-
-      this.$store.dispatch("loadNextData");
-    },
-  },
 };
 </script>
 
